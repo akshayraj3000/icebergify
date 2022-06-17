@@ -50,7 +50,6 @@ def berg():
         ###CREATE ICEBERG
 
         name = sp.current_user().display_name
-        print(name)
         if  ' ' in name:
             name = name[:name.index(' ')]
         if '.' in name:
