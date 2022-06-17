@@ -17,8 +17,8 @@ def privacy():
 def berg():
     ###AUTHENTICATION
 
-    cid = "807e4b747d9c4264b87542e38019d4c9" 
-    secret = "c752248925b0473a90ed87a9b180ea67"
+    cid = "" 
+    secret = ""
     redirect = 'http://localhost:8888/callback'
     scope = 'user-top-read'
 
