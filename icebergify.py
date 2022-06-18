@@ -1,9 +1,10 @@
 from flask import Flask, render_template, send_from_directory, redirect, session, request
 from PIL import Image, ImageFont, ImageDraw
 import tekore as tk
+import os
 
-cid = "807e4b747d9c4264b87542e38019d4c9" 
-secret = "c752248925b0473a90ed87a9b180ea67"
+cid = os.environ.get('CLIENT_ID')
+secret = os.environ.get('CLIENT_SECRET')
 #redirect_uri = 'http://164.92.148.45:5000/callback'
 redirect_uri = 'https://icebergify.com/callback'
 
@@ -14,7 +15,7 @@ auths = {}  # Ongoing authorisations: state -> UserAuth
 users = {}  # User tokens: state -> token (use state as a user ID)
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'd2h9e3bqx#1w*ko9a-dln7ydj#(1#-z)gvdn$0v-))f&iabw(*'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 @app.route('/')
 def home():
@@ -33,15 +34,7 @@ def berg():
     # Return early if no login or old session
     if user is None or token is None:
         session.pop('user', None)
-
-    if 'user' not in session:
-        scope = tk.scope.user_top_read
-        auth = tk.UserAuth(cred, scope)
-        auths[auth.state] = auth
-        return redirect(auth.url)
-
-    user = session.get('user', None)
-    token = users.get(user, None)
+        return redirect('/login')
 
     if token.is_expiring:
         token = cred.refresh(token)
@@ -110,12 +103,22 @@ def berg():
 
     return render_template('berg.html', value=bergname)
 
+@app.route('/login', methods=['GET'])
+def login():
+    if 'user' in session:
+        return redirect('/berg.html')
+    
+    scope = tk.scope.user_top_read
+    auth = tk.UserAuth(cred, scope)
+    auths[auth.state] = auth
+    return redirect(auth.url)
+
 @app.route('/callback', methods=['GET'])
 def callback():
     code = request.args.get('code', None)
     state = request.args.get('state', None)
     auth = auths.pop(state, None)
-
+    
     token = auth.request_token(code, state)
     session['user'] = state
     users[state] = token
