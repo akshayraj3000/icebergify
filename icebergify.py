@@ -1,21 +1,23 @@
 from flask import Flask, render_template, send_from_directory, redirect, session, request
 from PIL import Image, ImageFont, ImageDraw
 import tekore as tk
-import os
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_session import Session
 
-cid = os.environ.get('CLIENT_ID')
-secret = os.environ.get('CLIENT_SECRET')
+app = Flask(__name__)
+app.config['SECRET_KEY'] = ''
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
+
+app.wsgi_app = ProxyFix(app.wsgi_app)
+
+cid = ""
+secret = ""
 #redirect_uri = 'http://164.92.148.45:5000/callback'
 redirect_uri = 'https://icebergify.com/callback'
 
 cred = tk.Credentials(client_id=cid,client_secret=secret,redirect_uri=redirect_uri,sender=None, asynchronous=None)
 sp = tk.Spotify()
-
-auths = {}  # Ongoing authorisations: state -> UserAuth
-users = {}  # User tokens: state -> token (use state as a user ID)
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 @app.route('/')
 def home():
@@ -28,12 +30,11 @@ def privacy():
 @app.route('/berg.html')
 def berg():
     ###AUTHENTICATION
-    user = session.get('user', None)
-    token = users.get(user, None)
+    user = session.get('state', None)
+    token = session.get('token', None)
 
-    # Return early if no login or old session
     if user is None or token is None:
-        session.pop('user', None)
+        session.pop('state', None)#
         return redirect('/login')
 
     if token.is_expiring:
@@ -47,7 +48,7 @@ def berg():
             name = name[:name.index(' ')]
         if '.' in name:
             name = name[:name.index('.')]
-        
+
         artists = {}
         for term in ["long_term", "medium_term", "short_term"]:
             temp_artists = sp.current_user_top_artists(limit=50, offset=0, time_range=term)
@@ -105,23 +106,24 @@ def berg():
 
 @app.route('/login', methods=['GET'])
 def login():
-    if 'user' in session:
+    if session.get('token', None) is not None:
         return redirect('/berg.html')
-    
+
     scope = tk.scope.user_top_read
     auth = tk.UserAuth(cred, scope)
-    auths[auth.state] = auth
+    #session['auth'] = auth.__dict__
     return redirect(auth.url)
 
 @app.route('/callback', methods=['GET'])
 def callback():
-    code = request.args.get('code', None)
-    state = request.args.get('state', None)
-    auth = auths.pop(state, None)
-    
-    token = auth.request_token(code, state)
-    session['user'] = state
-    users[state] = token
+    code = request.args.get('code')
+    state = request.args.get('state')
+
+    #check if state matches auth state somehow
+    token = cred.request_user_token(code)
+    #token = auth.request_token(code, state)
+    session['state'] = state
+    session['token'] = token
     return redirect('/berg.html')
 
 @app.route('/data/<filename>')
