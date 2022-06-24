@@ -3,6 +3,8 @@ from PIL import Image, ImageFont, ImageDraw
 import tekore as tk
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_session import Session
+from fontTools.ttLib import TTFont
+from fontTools.unicode import Unicode
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = ''
@@ -26,6 +28,10 @@ def home():
 @app.route('/privacy.html')
 def privacy():
     return render_template('privacy.html')
+
+@app.route('/about.html')
+def about():
+    return render_template('about.html')
 
 @app.route('/berg.html')
 def berg():
@@ -70,7 +76,55 @@ def berg():
             artists_sorted.reverse()
             iceberg[section] = artists_sorted
 
-        intro_font = ImageFont.truetype("Intro Regular Regular.ttf", 55)
+        ###FONT WORK
+        intro = ImageFont.truetype("Intro Regular Regular.ttf", 55)
+        noto = ImageFont.truetype("NotoSans-Regular.ttf", 55)
+        korean = ImageFont.truetype("NotoSansKR-Regular.otf", 55)
+        japanese = ImageFont.truetype("rounded-mgenplus-1cp-regular.ttf", 55)
+
+        intro_ttf = TTFont('Intro Regular Regular.ttf')
+        noto_ttf = TTFont('NotoSans-Regular.ttf')
+        korean_ttf = TTFont('NotoSansKR-Regular.otf')
+        japanese_ttf = TTFont('rounded-mgenplus-1cp-regular.ttf')
+
+        def has_glyph(font, glyph):
+            for table in font['cmap'].tables:
+                if ord(glyph) in table.cmap.keys():
+                    return True
+            return False
+
+        def print_artist(artist):
+            count = 0
+            for char in artist:
+                if has_glyph(intro_ttf, char):
+                    count += 1
+            if count == len(artist):
+                return(intro)
+            
+            count = 0
+            for char in artist:
+                if has_glyph(noto_ttf, char):
+                    count += 1
+            if count == len(artist):
+                return(noto)
+
+            count = 0
+            for char in artist:
+                if has_glyph(korean_ttf, char):
+                    count += 1
+            if count == len(artist):
+                return(korean)
+
+            count = 0
+            for char in artist:
+                if has_glyph(japanese_ttf, char):
+                    count += 1
+            if count == len(artist):
+                return(japanese)
+            
+            return(intro)
+        
+        ###
         iceberg_img2 = Image.open("iceberg_blank2.jpg")
         image2 = ImageDraw.Draw(iceberg_img2)
 
@@ -89,7 +143,7 @@ def berg():
         for section in sections:
             count = 0
             for artist in iceberg[section[1]]:
-                image2.text(tuple(coordinates[section[1]][count]), artist, (230, 54, 41), intro_font)
+                image2.text(tuple(coordinates[section[1]][count]), artist, (230, 54, 41), print_artist(artist))
                 count += 1
 
         ###TITLE
