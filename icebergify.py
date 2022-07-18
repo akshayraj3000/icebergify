@@ -5,6 +5,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_session import Session
 from fontTools.ttLib import TTFont
 from fontTools.unicode import Unicode
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = ''
@@ -148,8 +149,11 @@ def berg():
 
         ###TITLE
         intro_font_big = ImageFont.truetype("Intro Regular Regular.ttf", 100)
-        image2.text((25, 20), name + "'s Spotify", (19, 81, 143), intro_font_big)
-        image2.text((195, 120), "Iceberg", (19, 81, 143), intro_font_big)
+        month_num = datetime.now().month
+        datetime_object = datetime.strptime(str(month_num), "%m")
+        month = datetime_object.strftime("%B")
+        image2.text((25, 20), name + "'s " + month, (19, 81, 143), intro_font_big)
+        image2.text((25, 120), "Spotify Iceberg", (19, 81, 143), intro_font_big)
 
         ###SAVING
         sid = sp.current_user().id
