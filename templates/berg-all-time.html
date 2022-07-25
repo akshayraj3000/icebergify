@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icebergify</title>
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/x-icon" href="static/favicon.png">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic&amp;display=swap">
+    <link rel="stylesheet" href="static/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="static/bergstyle.css">
+</head>
+<body style="background-color: rgb(229, 232, 236)";></body>
+<body id="page-top">
+    <section id="iceberg" class="content-section">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <p class="lead mb-5"><span>your iceberg will update as you listen to more music :) <a href="about.html">interpret your iceberg</a></span></p>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="col"><img src="{{ url_for('display_image', filename=value) }}" width = "580" height = "1144">
+            </div>
+            </div>
+        </div>
+    </section>
+    <footer class="footer text-center">
+        <div class="container">
+            <p class="text-muted mb-0 small">created by <a href="https://www.instagram.com/ahkshay/">Akshay Raj</a>&nbsp; © Icebergify 2022 | <a href="about.html">About</a>&nbsp; | <a href="privacy.html">Privacy</a> </p>
+        </div>
+        <div class="image"><img src="static/spotifylogo.png" width = "164" height = "44"></div>
+        <a class="js-scroll-trigger scroll-to-top rounded" href="#page-top"><i class="fa fa-angle-up"></i></a>
+    </footer>
+    <script src="static/home.js"></script>
+    <script src="static/berg.js"></script>
+</body>
+
+</html>
